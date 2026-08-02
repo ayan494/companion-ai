@@ -120,7 +120,7 @@ export const Route = createFileRoute("/api/chat")({
             messages: await convertToModelMessages(messages as UIMessage[]),
             // GPT-5 family rejects non-default temperature; only send it elsewhere.
             ...(isOpenAI ? {} : { temperature }),
-            ...(maxTokens ? { maxOutputTokens: isOpenAI ? undefined : maxTokens } : {}),
+            ...(maxTokens && !isOpenAI ? { maxOutputTokens: maxTokens } : {}),
             providerOptions: {
               lovable: {
                 ...(modelId.startsWith("openai/gpt-5.6") ? { reasoningEffort: "none" } : {}),
