@@ -19,7 +19,10 @@ function NewChat() {
   const settings = chatUiStore.pendingSettings;
   const model = settings?.model ?? DEFAULT_MODEL;
 
-  const start = async (text: string, files: Parameters<typeof Composer>[0] extends never ? never : Array<{ url: string; mediaType: string; filename: string }>) => {
+  const start = async (
+    text: string,
+    files: Array<{ url: string; mediaType: string; filename: string }>,
+  ) => {
     if (!user) return;
     try {
       const conversation = await createConversation(user.id, {
