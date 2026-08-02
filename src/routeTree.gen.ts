@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ChatRouteImport } from './routes/chat'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ChatIndexRouteImport } from './routes/chat.index'
 import { Route as ChatConversationIdRouteImport } from './routes/chat.$conversationId'
@@ -29,6 +30,11 @@ const AuthRoute = AuthRouteImport.update({
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
   path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/api/chat': typeof ApiChatRoute
   '/chat/$conversationId': typeof ChatConversationIdRoute
   '/chat/': typeof ChatIndexRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/api/chat': typeof ApiChatRoute
   '/chat/$conversationId': typeof ChatConversationIdRoute
   '/chat': typeof ChatIndexRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/api/chat': typeof ApiChatRoute
   '/chat/$conversationId': typeof ChatConversationIdRoute
   '/chat/': typeof ChatIndexRoute
@@ -74,14 +83,27 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/chat' | '/api/chat' | '/chat/$conversationId' | '/chat/'
+    | '/'
+    | '/auth'
+    | '/chat'
+    | '/reset-password'
+    | '/api/chat'
+    | '/chat/$conversationId'
+    | '/chat/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/api/chat' | '/chat/$conversationId' | '/chat'
+  to:
+    | '/'
+    | '/auth'
+    | '/reset-password'
+    | '/api/chat'
+    | '/chat/$conversationId'
+    | '/chat'
   id:
     | '__root__'
     | '/'
     | '/auth'
     | '/chat'
+    | '/reset-password'
     | '/api/chat'
     | '/chat/$conversationId'
     | '/chat/'
@@ -91,6 +113,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   ChatRoute: typeof ChatRouteWithChildren
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ApiChatRoute: typeof ApiChatRoute
 }
 
@@ -115,6 +138,13 @@ declare module '@tanstack/react-router' {
       path: '/chat'
       fullPath: '/chat'
       preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -157,6 +187,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   ChatRoute: ChatRouteWithChildren,
+  ResetPasswordRoute: ResetPasswordRoute,
   ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
