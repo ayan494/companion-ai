@@ -116,7 +116,7 @@ export const Route = createFileRoute("/api/chat")({
         try {
           const result = streamText({
             model: gateway(modelId),
-            system: systemPrompt,
+            ...(systemPrompt ? { system: systemPrompt } : {}),
             messages: await convertToModelMessages(messages as UIMessage[]),
             // GPT-5 family rejects non-default temperature; only send it elsewhere.
             ...(isOpenAI ? {} : { temperature }),
