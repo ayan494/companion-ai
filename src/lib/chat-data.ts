@@ -8,11 +8,11 @@ export type Conversation = Tables<"conversations">;
 export type MessageRow = Tables<"messages">;
 
 export type ChatMetadata = {
-  model?: string;
-  inputTokens?: number;
-  outputTokens?: number;
-  costUsd?: number;
-  stopped?: boolean;
+  model?: string | undefined;
+  inputTokens?: number | undefined;
+  outputTokens?: number | undefined;
+  costUsd?: number | undefined;
+  stopped?: boolean | undefined;
 };
 
 export type ChatUIMessage = UIMessage<ChatMetadata>;
