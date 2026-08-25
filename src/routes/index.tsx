@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
-  Bot,
   Code2,
   Gauge,
   History,
@@ -13,6 +12,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandLogo } from "@/components/brand-logo";
 import { CHAT_MODELS } from "@/lib/models";
 import { useAuth } from "@/lib/auth";
 
@@ -76,12 +76,9 @@ function Landing() {
   return (
     <div className="min-h-screen bg-hero">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
-        <div className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ion text-primary-foreground">
-            <Bot className="h-5 w-5" />
-          </span>
-          <span className="text-lg font-semibold tracking-tight">Ion Chat</span>
-        </div>
+        <Link to="/" className="flex items-center gap-2">
+          <BrandLogo size="md" />
+        </Link>
         <nav className="flex items-center gap-2">
           <ThemeToggle />
           {loading ? null : user ? (
@@ -91,12 +88,12 @@ function Landing() {
           ) : (
             <>
               <Button asChild variant="ghost" size="sm">
-                <Link to="/auth" search={{ mode: "signin", next: undefined }}>
+                <Link to="/auth" search={{ mode: "signin" }}>
                   Sign in
                 </Link>
               </Button>
               <Button asChild variant="ion" size="sm">
-                <Link to="/auth" search={{ mode: "signup", next: undefined }}>
+                <Link to="/auth" search={{ mode: "signup" }}>
                   Get started
                 </Link>
               </Button>
@@ -119,12 +116,21 @@ function Landing() {
             tracking — in one fast, quiet interface.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild size="lg" variant="ion">
-              <Link to={user ? "/chat" : "/auth"} search={user ? undefined : { mode: "signup", next: undefined }}>
-                {user ? "Open your chats" : "Start chatting free"}
-                <ArrowRight />
-              </Link>
-            </Button>
+            {user ? (
+              <Button asChild size="lg" variant="ion">
+                <Link to="/chat">
+                  Open your chats
+                  <ArrowRight />
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild size="lg" variant="ion">
+                <Link to="/auth" search={{ mode: "signup" }}>
+                  Start chatting free
+                  <ArrowRight />
+                </Link>
+              </Button>
+            )}
             <Button asChild size="lg" variant="outline">
               <a href="#features">See what's inside</a>
             </Button>
@@ -154,12 +160,21 @@ function Landing() {
             <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
               No API keys to paste, no provider dashboards. Sign up and start a thread.
             </p>
-            <Button asChild size="lg" variant="ion" className="mt-7">
-              <Link to={user ? "/chat" : "/auth"} search={user ? undefined : { mode: "signup", next: undefined }}>
-                {user ? "Open your chats" : "Create your account"}
-                <ArrowRight />
-              </Link>
-            </Button>
+            {user ? (
+              <Button asChild size="lg" variant="ion" className="mt-7">
+                <Link to="/chat">
+                  Open your chats
+                  <ArrowRight />
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild size="lg" variant="ion" className="mt-7">
+                <Link to="/auth" search={{ mode: "signup" }}>
+                  Create your account
+                  <ArrowRight />
+                </Link>
+              </Button>
+            )}
           </div>
         </section>
       </main>

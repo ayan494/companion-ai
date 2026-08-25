@@ -39,22 +39,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    void supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      setLoading(false);
-    });
+    void supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        setSession(data?.session ?? null);
+        setUser(data?.session?.user ?? null);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.warn("[Auth] getSession network error:", err);
+        setLoading(false);
+      });
 
     return () => subscription.subscription.unsubscribe();
   }, []);
 
   const loadProfile = async (userId: string) => {
-    const [{ data: profileRow }, { data: roleRows }] = await Promise.all([
-      supabase.from("profiles").select("id, display_name, avatar_url").eq("id", userId).maybeSingle(),
-      supabase.from("user_roles").select("role").eq("user_id", userId),
-    ]);
-    setProfile(profileRow ?? { id: userId, display_name: null, avatar_url: null });
-    setIsAdmin((roleRows ?? []).some((row) => row.role === "admin"));
+    try {
+      const [{ data: profileRow }, { data: roleRows }] = await Promise.all([
+        supabase.from("profiles").select("id, display_name, avatar_url").eq("id", userId).maybeSingle(),
+        supabase.from("user_roles").select("role").eq("user_id", userId),
+      ]);
+      setProfile(profileRow ?? { id: userId, display_name: null, avatar_url: null });
+      setIsAdmin((roleRows ?? []).some((row) => row.role === "admin"));
+    } catch (err) {
+      console.warn("[Auth] Failed to load profile:", err);
+      setProfile({ id: userId, display_name: null, avatar_url: null });
+      setIsAdmin(false);
+    }
   };
 
   useEffect(() => {

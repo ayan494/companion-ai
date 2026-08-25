@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Composer } from "@/components/chat/composer";
+import { BrandIcon } from "@/components/brand-logo";
 import { useAuth } from "@/lib/auth";
 import { createConversation, deriveTitle } from "@/lib/chat-data";
 import { chatUiStore } from "@/lib/chat-ui-store";
@@ -57,6 +58,7 @@ function NewChat() {
 
       <div className="flex flex-1 items-center justify-center px-4">
         <div className="w-full max-w-3xl text-center">
+          <BrandIcon size="lg" className="mx-auto mb-4" />
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
             What are we working on today?
           </h1>

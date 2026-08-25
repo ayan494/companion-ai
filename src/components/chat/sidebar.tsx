@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import {
-  Bot,
   Check,
   Download,
   LogOut,
@@ -22,6 +21,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandLogo } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 import type { Conversation } from "@/lib/chat-data";
@@ -69,10 +69,7 @@ export function ChatSidebar({
     <aside className="flex h-full w-72 flex-col border-r border-border bg-surface">
       <div className="flex items-center justify-between gap-2 px-3 py-3">
         <Link to="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ion text-primary-foreground">
-            <Bot className="h-4 w-4" />
-          </span>
-          <span className="text-sm font-semibold tracking-tight">Ion Chat</span>
+          <BrandLogo size="sm" />
         </Link>
         <div className="flex items-center gap-1">
           <ThemeToggle />

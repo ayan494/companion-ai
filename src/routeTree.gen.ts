@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ChatIndexRouteImport } from './routes/chat.index'
 import { Route as ChatConversationIdRouteImport } from './routes/chat.$conversationId'
 
@@ -48,6 +49,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthRoute,
+} as any)
 const ChatIndexRoute = ChatIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -62,19 +68,21 @@ const ChatConversationIdRoute = ChatConversationIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/chat': typeof ChatRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/api/chat': typeof ApiChatRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/chat/$conversationId': typeof ChatConversationIdRoute
   '/chat/': typeof ChatIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/api/chat': typeof ApiChatRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/chat/$conversationId': typeof ChatConversationIdRoute
   '/chat': typeof ChatIndexRoute
 }
@@ -82,10 +90,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/chat': typeof ChatRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/api/chat': typeof ApiChatRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/chat/$conversationId': typeof ChatConversationIdRoute
   '/chat/': typeof ChatIndexRoute
 }
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/reset-password'
     | '/api/chat'
+    | '/auth/callback'
     | '/chat/$conversationId'
     | '/chat/'
   fileRoutesByTo: FileRoutesByTo
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/api/chat'
+    | '/auth/callback'
     | '/chat/$conversationId'
     | '/chat'
   id:
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/reset-password'
     | '/api/chat'
+    | '/auth/callback'
     | '/chat/$conversationId'
     | '/chat/'
   fileRoutesById: FileRoutesById
@@ -124,7 +136,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
   ChatRoute: typeof ChatRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -174,6 +186,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/chat/': {
       id: '/chat/'
       path: '/'
@@ -191,6 +210,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthRouteChildren {
+  AuthCallbackRoute: typeof AuthCallbackRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthCallbackRoute: AuthCallbackRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 interface ChatRouteChildren {
   ChatConversationIdRoute: typeof ChatConversationIdRoute
   ChatIndexRoute: typeof ChatIndexRoute
@@ -206,7 +235,7 @@ const ChatRouteWithChildren = ChatRoute._addFileChildren(ChatRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
   ChatRoute: ChatRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiChatRoute: ApiChatRoute,
@@ -214,3 +243,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

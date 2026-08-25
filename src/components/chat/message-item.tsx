@@ -4,6 +4,7 @@ import { Check, Copy, Pencil, RefreshCw, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
 import { Markdown } from "@/components/chat/markdown";
+import { BrandIcon } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
 import { estimateCost, formatCost, getModel } from "@/lib/models";
 import type { ChatUIMessage } from "@/lib/chat-data";
@@ -55,9 +56,9 @@ export const MessageItem = memo(function MessageItem({
   return (
     <div className={cn("group/message flex w-full gap-3", isUser ? "justify-end" : "justify-start")}>
       {!isUser && (
-        <span className="mt-1 hidden h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-ion text-[11px] font-bold text-primary-foreground sm:flex">
-          AI
-        </span>
+        <div className="mt-0.5 hidden shrink-0 sm:flex">
+          <BrandIcon size="sm" />
+        </div>
       )}
 
       <div className={cn("min-w-0", isUser ? "max-w-[85%]" : "w-full max-w-full")}>

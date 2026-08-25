@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Bot, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -7,14 +7,20 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandLogo } from "@/components/brand-logo";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 
-const searchSchema = z.object({
-  mode: z.enum(["signin", "signup"]).catch("signin"),
-  next: z.string().optional(),
-});
+const searchSchema = z
+  .object({
+    mode: z.enum(["signin", "signup"]).catch("signin"),
+    next: z.string().optional(),
+    error: z.string().optional(),
+    error_code: z.string().optional(),
+    error_description: z.string().optional(),
+    code: z.string().optional(),
+  })
+  .passthrough();
 
 export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
@@ -37,7 +43,8 @@ const credentialsSchema = z.object({
 });
 
 function AuthPage() {
-  const { mode, next } = Route.useSearch();
+  const search = Route.useSearch();
+  const { mode, next } = search;
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [email, setEmail] = useState("");
@@ -47,6 +54,13 @@ function AuthPage() {
   const [checkEmail, setCheckEmail] = useState(false);
 
   const isSignup = mode === "signup";
+
+  useEffect(() => {
+    if (search.error || search.error_description) {
+      const errorMsg = search.error_description || search.error || "Authentication failed";
+      toast.error(decodeURIComponent(errorMsg).replace(/\+/g, " "));
+    }
+  }, [search.error, search.error_description]);
 
   useEffect(() => {
     if (!loading && user) {
@@ -69,7 +83,7 @@ function AuthPage() {
           email: parsed.data.email,
           password: parsed.data.password,
           options: {
-            emailRedirectTo: window.location.origin + "/chat",
+            emailRedirectTo: window.location.origin + "/auth/callback",
             data: { display_name: displayName.trim() || parsed.data.email.split("@")[0] },
           },
         });
@@ -88,7 +102,12 @@ function AuthPage() {
         toast.success("Welcome back");
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Authentication failed");
+      const msg = error instanceof Error ? error.message : "Authentication failed";
+      if (msg.toLowerCase().includes("failed to fetch") || msg.toLowerCase().includes("fetch failed")) {
+        toast.error("Cannot reach Supabase. Please update your VITE_SUPABASE_URL in .env with your active project URL.");
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setBusy(false);
     }
@@ -96,16 +115,31 @@ function AuthPage() {
 
   const handleGoogle = async () => {
     setBusy(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/auth",
-    });
-    if (result.error) {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) {
+        const msg = error.message;
+        if (msg.toLowerCase().includes("failed to fetch") || msg.toLowerCase().includes("fetch failed")) {
+          toast.error("Cannot reach Supabase. Please update your VITE_SUPABASE_URL in .env with your active project URL.");
+        } else {
+          toast.error(msg);
+        }
+        setBusy(false);
+      }
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Google sign-in failed";
+      if (msg.toLowerCase().includes("failed to fetch") || msg.toLowerCase().includes("fetch failed")) {
+        toast.error("Cannot reach Supabase. Please update your VITE_SUPABASE_URL in .env with your active project URL.");
+      } else {
+        toast.error(msg);
+      }
       setBusy(false);
-      toast.error(result.error.message ?? "Google sign-in failed");
-      return;
     }
-    if (result.redirected) return;
-    setBusy(false);
   };
 
   const handleReset = async () => {
@@ -114,21 +148,30 @@ function AuthPage() {
       toast.error("Enter your email address first");
       return;
     }
-    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
-      redirectTo: window.location.origin + "/reset-password",
-    });
-    if (error) toast.error(error.message);
-    else toast.success("Password reset link sent");
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
+        redirectTo: window.location.origin + "/reset-password",
+      });
+      if (error) {
+        if (error.message.toLowerCase().includes("failed to fetch") || error.message.toLowerCase().includes("fetch failed")) {
+          toast.error("Cannot reach Supabase. Please check your VITE_SUPABASE_URL in .env.");
+        } else {
+          toast.error(error.message);
+        }
+      } else {
+        toast.success("Password reset link sent");
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Password reset failed";
+      toast.error(msg);
+    }
   };
 
   return (
     <div className="flex min-h-screen flex-col bg-hero">
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-5">
         <Link to="/" className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ion text-primary-foreground">
-            <Bot className="h-5 w-5" />
-          </span>
-          <span className="text-lg font-semibold tracking-tight">Ion Chat</span>
+          <BrandLogo size="md" />
         </Link>
         <ThemeToggle />
       </header>
